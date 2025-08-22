@@ -1,0 +1,43 @@
+name: Sync dev from upstream repository
+
+on:
+  workflow_dispatch:
+    inputs:
+      artifact-repository:
+        description: "Upstream repository (format: owner/name)"
+        type: string
+        required: true
+      artifact-id:
+        description: "Artifact ID from upstream repository"
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+env:
+  DOWNLOAD_PATH: "/tmp/output"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download site artifact from upstream repository
+        uses: actions/download-artifact@v5
+        with:
+          repository: ${{ github.event.inputs.artifact-repository }}
+          artifact-ids: ${{ github.event.inputs.artifact-id }}
+      - name: Upload site artifact to this repository
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.DOWNLOAD_PATH }}
+      - name: Deploy page
+        uses: actions/deploy-pages@v4
