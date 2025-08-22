@@ -11,6 +11,10 @@ on:
         description: "Artifact ID from upstream repository"
         type: string
         required: true
+      artifact-run-id:
+        description: "Workflow Run ID where the artifact was uploaded from"
+        type: string
+        required: true
 
 permissions:
   contents: read
@@ -35,6 +39,14 @@ jobs:
         with:
           repository: ${{ github.event.inputs.artifact-repository }}
           artifact-ids: ${{ github.event.inputs.artifact-id }}
+          run-id: ${{ github.event.inputs.artifact-run-id }}
+          path: ${{ env.DOWNLOAD_PATH }}
+          github-token: ${{ secrets.SYNC_DEV_TOKEN }}  # Fine-Grained PAT, upstream repository, Actions=R
+      - name: Extract artifact
+        working-directory: ${{ env.DOWNLOAD_PATH }}
+        run: |
+          tar -xf artifact.tar
+          rm artifact.tar
       - name: Upload site artifact to this repository
         uses: actions/upload-pages-artifact@v3
         with:
