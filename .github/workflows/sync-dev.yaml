@@ -47,6 +47,11 @@ jobs:
         run: |
           tar -xf artifact.tar
           rm artifact.tar
+      - name: Create robots.txt (hide all)
+        working-directory: ${{ env.DOWNLOAD_PATH }}
+        run: |
+          echo "User-agent: *" >> robots.txt
+          echo "Disallow: /" >> robots.txt
       - name: Upload site artifact to this repository
         uses: actions/upload-pages-artifact@v3
         with:
